@@ -8,15 +8,40 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(readr)
 library(dplyr)
 library(ggplot2)
 theme_set(theme_bw())
+library(arrow)
+library(readr)
 ```
+
+# Science questions
+
+1. How much do tree stem GHG fluxes vary over the course of the year?
+2. ...
 
 # Read data
 
 ```{r read-data}
+# Data file from the TEMPEST repository
+message("Reading data...")
+dat <- read_parquet("tempest_tree_ghg_fluxes.parquet")
+
+message(nrow(dat), " rows and ", ncol(dat), " columns")
+```
+
+# Join with species data
+
+```{r sapflow-trees}
+# 1. Drop existing species column from dat
+# 2. Read in sapflow-trees.csv
+# 3. Join
+```
+
+# Plot annual cycle
+
+```{r}
+# 1: remove TEMPEST flood measurements
 
 ```
 
