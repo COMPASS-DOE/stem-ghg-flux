@@ -47,3 +47,9 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Rmarkdown outputs
+*.html
+
+# OS files
+.DS_Store

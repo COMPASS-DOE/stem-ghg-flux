@@ -1,0 +1,22 @@
+---
+title: "stem-ghg-flux"
+author: "EP"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+theme_set(theme_bw())
+```
+
+# Read data
+
+```{r read-data}
+
+```
+
