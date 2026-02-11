@@ -30,12 +30,22 @@ dat <- read_parquet("tempest_tree_ghg_fluxes.parquet")
 message(nrow(dat), " rows and ", ncol(dat), " columns")
 ```
 
+# Quick summary and visualization of data
+
+```{r quick-look}
+glimpse(dat)
+
+# 1. Print summary
+
+# 2. ggplot(dat, ...)
+```
+
 # Join with species data
 
 ```{r sapflow-trees}
-# 1. Drop existing species column from dat
-# 2. Read in sapflow-trees.csv
-# 3. Join
+# 3. Drop existing species column from dat
+# 4. Read in sapflow-trees.csv
+# 5. Join -- probably using left_join()
 ```
 
 # Plot annual cycle
