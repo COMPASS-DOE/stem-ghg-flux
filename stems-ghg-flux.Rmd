@@ -38,6 +38,7 @@ glimpse(dat)
 # 1. Print summary
 summary(dat)
 # 2. ggplot(dat, ...)
+
 ```
 
 # Join with species data
@@ -54,4 +55,7 @@ summary(dat)
 # 1: remove TEMPEST flood measurements
 
 ```
+
+# figure/graph practice 
+
 
