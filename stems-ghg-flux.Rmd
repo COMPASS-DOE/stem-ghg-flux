@@ -58,4 +58,13 @@ summary(dat)
 
 # figure/graph practice 
 
+```{r}
 
+ggplot(data = dat, mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = as.factor(ID))) +
+  geom_point() + # Add a layer of points
+  labs(title = "Practice",
+       x = "X",
+       y = "Y",
+       color = "ID") + # Add labels and a title
+  theme_minimal() # Apply a clean theme
+```
