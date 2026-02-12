@@ -46,7 +46,24 @@ summary(dat)
 ```{r sapflow-trees}
 # 3. Drop existing species column from dat
 # 4. Read in sapflow-trees.csv
+
+tree_inventory <- read.csv("sapflow-trees.csv")
+
 # 5. Join -- probably using left_join()
+
+dat %>%
+  mutate(Sapflux_ID = ID) %>%
+  left_join(tree_inventory, by = "Sapflux_ID") -> tree_dat
+
+# optional cleaning
+tree_dat %>%
+  mutate(Species = case_when(
+    Species_Code == "ACRU" ~ "Red Maple",
+    Species_Code == "LITU" ~ "Tulip Poplar",
+    Species_Code == "FAGR" ~ "American Beech"
+  )) -> tree_dat
+
+
 ```
 
 # Plot annual cycle
