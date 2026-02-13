@@ -1,4 +1,4 @@
-﻿Plot,Tree_ID,spp,Grid_Square,Sapflux_ID,Sapflux_2.5cm,Sapflux_5.0cm,Tree_Flux,Dendro,Auto_dendro
+Plot,Tree_ID,spp,Grid_Square,Sapflux_ID,Sapflux_2.5cm,Sapflux_5.0cm,Tree_Flux,Dendro,Auto_dendro
 Control,1439,ACRU,B3,C7,TRUE,FALSE,TRUE,TRUE,FALSE
 Control,1436,ACRU,C4,C8,TRUE,TRUE,TRUE,TRUE,FALSE
 Control,1451,ACRU,A1,C19,TRUE,FALSE,TRUE,TRUE,FALSE
