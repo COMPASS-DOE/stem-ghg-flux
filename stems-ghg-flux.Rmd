@@ -46,12 +46,12 @@ summary(dat)
 
 ```{r sapflow-trees}
 # 3. Drop existing species column from dat
-# 4. Read in sapflow-trees.csv
+# 4. Read in TEMPEST_Trees_Instruments.csv
 
 tree_inventory <- read.csv("sapflow-trees.csv") %>% 
   select(-Tree_ID, Grid_Square) # don't need these
 
-# Join the stem flux and tree inventory data frames
+#
 dat %>%
   left_join(tree_inventory,
             # in dat the column is "ID", while in the tree inventory it's
@@ -62,7 +62,7 @@ dat %>%
             # that we expect a many-to-one relationship (i.e., there shouldn't
             # be multiple matches for a given sapflux tree!)
             relationship = "many-to-one") ->
-  tree_dat
+        tree_dat
 
 # To help readability, generate the common name from the species code
 tree_dat %>%
