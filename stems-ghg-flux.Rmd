@@ -48,8 +48,8 @@ summary(dat)
 # 3. Drop existing species column from dat
 # 4. Read in TEMPEST_Trees_Instruments.csv
 
-tree_inventory <- read.csv("sapflow-trees.csv") %>% 
-  select(-Tree_ID, Grid_Square) # don't need these
+tree_inventory <- read.csv("TEMPEST_Trees_Instruments.csv") %>% 
+  select(Sapflux_ID, spp) # don't need these
 
 #
 dat %>%
@@ -67,9 +67,9 @@ dat %>%
 # To help readability, generate the common name from the species code
 tree_dat %>%
   mutate(Species = case_when(
-    Species_Code == "ACRU" ~ "Red maple",
-    Species_Code == "LITU" ~ "Tulip poplar",
-    Species_Code == "FAGR" ~ "American beech"
+    spp == "ACRU" ~ "Red maple",
+    spp == "LITU" ~ "Tulip poplar",
+    spp == "FAGR" ~ "American beech"
   )) -> 
   tree_dat
 
