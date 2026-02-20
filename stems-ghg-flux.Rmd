@@ -45,7 +45,7 @@ summary(dat)
 
 ```{r sapflow-trees}
 # 3. Drop existing species column from dat
-# 4. Read in sapflow-trees.csv
+# 4. Read in TEMPEST_Trees_Instruments.csv
 
 tree_instruments <- read.csv("TEMPEST_Trees_Instruments.csv")
 
