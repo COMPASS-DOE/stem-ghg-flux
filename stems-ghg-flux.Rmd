@@ -10,9 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(dplyr)
 library(ggplot2)
-theme_set(theme_bw())
+theme_set(theme_minimal())
 library(arrow)
 library(readr)
+library(tidyr)
 ```
 
 # Science questions
@@ -47,41 +48,71 @@ summary(dat)
 # 3. Drop existing species column from dat
 # 4. Read in TEMPEST_Trees_Instruments.csv
 
-tree_instruments <- read.csv("TEMPEST_Trees_Instruments.csv")
+tree_inventory <- read.csv("sapflow-trees.csv") %>% 
+  select(-Tree_ID, Grid_Square) # don't need these
 
-# 5. Join -- probably using left_join()
-
+#
 dat %>%
-  mutate(Sapflux_ID = ID) %>%
-  left_join(tree_instruments, by = "Sapflux_ID") -> tree_dat
+  left_join(tree_inventory,
+            # in dat the column is "ID", while in the tree inventory it's
+            # "Sapflux_ID", so we tell left_join that these two columns 
+            # correspond to each other 
+            by = c("ID" = "Sapflux_ID"), 
+            # this is optional but good 'defensive programming': we specify
+            # that we expect a many-to-one relationship (i.e., there shouldn't
+            # be multiple matches for a given sapflux tree!)
+            relationship = "many-to-one") ->
+        tree_dat
 
-# optional cleaning
+# To help readability, generate the common name from the species code
 tree_dat %>%
-  mutate(spp = case_when(
-    spp == "ACRU" ~ "Red Maple",
-    spp == "LITU" ~ "Tulip Poplar",
-    spp == "FAGR" ~ "American Beech"
-  )) -> tree_dat
+  mutate(Species = case_when(
+    Species_Code == "ACRU" ~ "Red maple",
+    Species_Code == "LITU" ~ "Tulip poplar",
+    Species_Code == "FAGR" ~ "American beech"
+  )) -> 
+  tree_dat
 
-
+# Make a nice summary table to check things
+tree_dat %>% 
+  # for each plot and species...
+  group_by(Plot, Species) %>% 
+  # ...count the number of distinct IDs...
+  summarise(value = n_distinct(ID), .groups = "drop") %>% 
+  # ...and then reshape so that plot names run across the top
+  pivot_wider(names_from = "Plot") %>% 
+  knitr::kable()
 ```
 
-# Plot annual cycle
+EVAN: from the table above we see a problem. What is it, and how do we deal with it?
 
-```{r}
-# 1: remove TEMPEST flood measurements
+# Plot annual cycle - raw data
 
-```
+```{r annual-cycle-raw}
+# Filter out the TEMPEST flood measurements
+tree_dat %>% 
+  filter(Timepoint %in% c("(none)", "Pre-Treatment")) ->
+  tree_dat_ac
 
-# figure/graph practice 
+message("Annual cycle dataset has ", nrow(tree_dat_ac), " rows and ",
+        ncol(tree_dat_ac), " columns")
 
-```{r}
-
-ggplot(data = dat, mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = as.factor(ID))) +
+# EVAN:
+# 1. What data frame do we want to use to plot?
+# 2. This plots each tree as a separate color. How useful is this? What are alternatives?
+ggplot(data = dat, 
+       mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = as.factor(ID))) +
   geom_point() + # Add a layer of points
-  labs(title = "Practice",
-       x = "X",
-       y = "Y",
-       color = "ID") + # Add labels and a title
-  theme_minimal() # Apply a clean theme
+  labs(title = "Practice")  # Add labels and a title
 ```
+
+# Summarize by ...?
+
+The trees are _experimental units_ but what we're actually interested in is...
+
+```{r annual-cycle-summary}
+
+# EVAN: how do we want to summarize and then plot the annual cycle data?
+
+```
+
