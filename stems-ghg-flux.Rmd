@@ -134,5 +134,60 @@ The trees are _experimental units_ but what we're actually interested in is...
 
 # EVAN: how do we want to summarize and then plot the annual cycle data?
 
-```
+library(dplyr)
+library(lubridate)
 
+#calculate average CO2 flux per year per species
+
+tree_dat %>%
+  mutate(Year = year(Date)) %>%  # Extract the year from the Date column
+  group_by(Year, Species) %>%  # Group by Year and Species
+  summarise(avg_CO2_flux = mean(CO2_lin_flux.estimate, na.rm = TRUE), .groups = "drop") -> 
+  avg_CO2flux_per_year_species
+
+# View the resulting table
+print(avg_CO2flux_per_year_species)
+
+# Plotting the average CO2 flux by year and species
+ggplot(avg_CO2flux_per_year_species, aes(x = Year, y = avg_CO2_flux, color = Species)) +
+  geom_line(size = 1) +  # Add lines to connect points
+  geom_point(size = 3) +  # Add points at each data point
+  labs(
+    title = "Average Annual CO2 Flux by Species", 
+    x = "Year", 
+    y = "Average CO2 Flux (g CO2 / m² / day)",
+    color = "Species"
+  ) +
+  theme_minimal() +  # Clean minimal theme
+  theme(
+    legend.position = "top",  # Position the legend at the top
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Angle x-axis labels for better readability
+  )
+
+
+#calculate average CH4 flux per year per species
+
+tree_dat %>%
+  mutate(Year = year(Date)) %>%  # Extract the year from the Date column
+  group_by(Year, Species) %>%  # Group by Year and Species
+  summarise(avg_CH4_flux = mean(CH4_lin_flux.estimate, na.rm = TRUE), .groups = "drop") -> 
+  avg_CH4flux_per_year_species
+
+# View the resulting table
+print(avg_CH4flux_per_year_species)
+
+# Plotting the average CH4 flux by year and species
+ggplot(avg_CH4flux_per_year_species, aes(x = Year, y = avg_CH4_flux, color = Species)) +
+  geom_line(size = 1) +  # Add lines to connect points
+  geom_point(size = 3) +  # Add points at each data point
+  labs(
+    title = "Average Annual CH4 Flux by Species", 
+    x = "Year", 
+    y = "Average CO2 Flux (g CH4 / m² / day)",
+    color = "Species"
+  ) +
+  theme_minimal() +  # Clean minimal theme
+  theme(
+    legend.position = "top",  # Position the legend at the top
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Angle x-axis labels for better readability
+  )
