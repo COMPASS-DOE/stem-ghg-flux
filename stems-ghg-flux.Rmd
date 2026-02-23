@@ -31,6 +31,26 @@ dat <- read_parquet("tempest_tree_ghg_fluxes.parquet")
 message(nrow(dat), " rows and ", ncol(dat), " columns")
 ```
 
+# Soil data
+
+```{r soil-data}
+# Read soil temperature and moisture data
+files <- list.files(path = "L2_data/", pattern = "parquet$", full.names = TRUE)
+lapply(files, read_parquet) %>% 
+  bind_rows() %>% 
+  # compute a 'Date' column...
+  mutate(Date = as.Date(TIMESTAMP)) %>% 
+  # ...and average variables for each date
+  group_by(Site, Plot, Date, research_name) %>% 
+  summarise(Value = mean(Value), .groups = "drop") %>% 
+  # reshape 
+  pivot_wider(names_from = "research_name", values_from = "Value", names_repair = "universal") ->
+  soildat
+
+# TODO: plot soil data
+```
+
+
 # Quick summary and visualization of data
 
 ```{r quick-look}
@@ -100,8 +120,8 @@ message("Annual cycle dataset has ", nrow(tree_dat_ac), " rows and ",
 # EVAN:
 # 1. What data frame do we want to use to plot?
 # 2. This plots each tree as a separate color. How useful is this? What are alternatives?
-ggplot(data = dat, 
-       mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = pecies))+
+ggplot(data = tree_dat, 
+       mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = Species))+
   geom_point() + # Add a layer of points
   labs(title = "Practice")  # Add labels and a title
 ```
