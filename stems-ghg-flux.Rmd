@@ -149,6 +149,7 @@ tree_dat %>%
 print(avg_CO2flux_per_year_species)
 
 # Plotting the average CO2 flux by year and species
+
 ggplot(avg_CO2flux_per_year_species, aes(x = Year, y = avg_CO2_flux, color = Species)) +
   geom_line(size = 1) +  # Add lines to connect points
   geom_point(size = 3) +  # Add points at each data point
@@ -163,6 +164,7 @@ ggplot(avg_CO2flux_per_year_species, aes(x = Year, y = avg_CO2_flux, color = Spe
     legend.position = "top",  # Position the legend at the top
     axis.text.x = element_text(angle = 45, hjust = 1)  # Angle x-axis labels for better readability
   )
+
 
 
 #calculate average CH4 flux per year per species
@@ -191,3 +193,105 @@ ggplot(avg_CH4flux_per_year_species, aes(x = Year, y = avg_CH4_flux, color = Spe
     legend.position = "top",  # Position the legend at the top
     axis.text.x = element_text(angle = 45, hjust = 1)  # Angle x-axis labels for better readability
   )
+
+
+# Looking at average CO2 and CH4 by date instead of year
+
+
+#calculate average CO2 flux per date per species
+
+# Summarizing by specific Date and Species
+avg_CO2flux_per_day_species <- tree_dat %>%
+  group_by(Date, Species) %>%  # Group by full Date and Species
+  summarise(avg_CO2_flux = mean(CO2_lin_flux.estimate, na.rm = TRUE), .groups = "drop")
+
+# Ensure the Date column is in Date format (if needed)
+avg_CO2flux_per_day_species$Date <- as.Date(avg_CO2flux_per_day_species$Date)
+
+
+# Plotting the average flux by Date and Species
+ggplot(avg_CO2flux_per_day_species, aes(x = Date, y = avg_CO2_flux, color = Species)) +
+  geom_line(size = 1) +  # Add lines to connect points
+  geom_point(size = 3) +  # Add points at each data point
+  labs(
+    title = "Average CO2 Flux by Date and Species", 
+    x = "Date", 
+    y = "Average CO2 Flux (g CO2 / m² / day)",
+    color = "Species"
+  ) +
+  theme_minimal() +  # Clean minimal theme
+  theme(
+    legend.position = "top",  # Position the legend at the top
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )
+
+
+  #calculate average CH4 flux per date per species
+
+# Summarizing by specific Date and Species
+avg_CH4flux_per_day_species <- tree_dat %>%
+  group_by(Date, Species) %>%  # Group by full Date and Species
+  summarise(avg_CH4_flux = mean(CH4_lin_flux.estimate, na.rm = TRUE), .groups = "drop")
+
+# Ensure the Date column is in Date format (if needed)
+avg_CH4flux_per_day_species$Date <- as.Date(avg_CH4flux_per_day_species$Date)
+
+
+# Plotting the average CH4 flux by Date and Species
+ggplot(avg_CH4flux_per_day_species, aes(x = Date, y = avg_CH4_flux, color = Species)) +
+  geom_line(size = 1) +  # Add lines to connect points
+  geom_point(size = 3) +  # Add points at each data point
+  labs(
+    title = "Average CH4 Flux by Date and Species", 
+    x = "Date", 
+    y = "Average CH4 Flux (g CO2 / m² / day)",
+    color = "Species"
+  ) +
+  theme_minimal() +  # Clean minimal theme
+  theme(
+    legend.position = "top",  # Position the legend at the top
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )
+```
+
+  #remove s7
+```{r no S7}
+# Specify the tree ID you want to remove (S7)
+tree_id_to_remove <- "S7"
+
+# Create a new dataset excluding the specified tree ID (S7)
+tree_dat_no_S7 <- tree_dat %>%
+  filter(ID != tree_id_to_remove)  # Exclude the tree with ID = "S7"
+
+# Check column names to ensure 'ID' is correct
+colnames(tree_dat)
+
+# Specify the tree ID you want to remove (S7)
+tree_id_to_remove <- "S7"
+
+# Calculate the average CH4 flux per date and species excluding tree "S7"
+avg_CH4flux_no_S7 <- tree_dat_no_S7 %>%
+  group_by(Date, Species) %>%  # Group by Date and Species
+  summarise(avg_CH4_flux = mean(CH4_lin_flux.estimate, na.rm = TRUE), .groups = "drop")
+
+# Ensure the Date column is in Date format (if needed)
+avg_CH4flux_no_S7$Date <- as.Date(avg_CH4flux_no_S7$Date)
+
+# Plotting the average CH4 flux by Date and Species (excluding tree "S7")
+ggplot(avg_CH4flux_no_S7, aes(x = Date, y = avg_CH4_flux, color = Species)) +
+  geom_line(size = 1) +  # Add lines to connect points
+  geom_point(size = 3) +  # Add points at each data point
+  labs(
+    title = "Average CH4 Flux by Date and Species (Excluding Tree S7)", 
+    x = "Date", 
+    y = "Average CH4 Flux (g CH4 / m² / day)",
+    color = "Species"
+  ) +
+  theme_minimal() +  # Clean minimal theme
+  theme(
+    legend.position = "top",  # Position the legend at the top
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )
+
+```
+
