@@ -30,14 +30,7 @@ dat <- read_parquet("tempest_tree_ghg_fluxes.parquet")
 
 message(nrow(dat), " rows and ", ncol(dat), " columns")
 ```
-# Change "Seawater" to "Saltwater"
 
-```{}
-
-tree_dat <- tree_dat %>%
-  mutate(Plot = recode(Plot, "Seawater" = "Saltwater"))
-
-```
 
 # Soil data
 
@@ -112,7 +105,6 @@ tree_dat %>%
   knitr::kable()
 ```
 
-EVAN: from the table above we see a problem. What is it, and how do we deal with it?
 
 # Plot annual cycle - raw data
 
@@ -202,6 +194,14 @@ ggplot(avg_CH4flux_per_year_species, aes(x = Year, y = avg_CH4_flux, color = Spe
     axis.text.x = element_text(angle = 45, hjust = 1)  # Angle x-axis labels for better readability
   )
 ```
+# Change "Seawater" to "Saltwater"
+
+```{}
+
+tree_dat <- tree_dat %>%
+  mutate(Plot = recode(Plot, "Seawater" = "Saltwater"))
+
+```
 
 # Looking at average CO2 and CH4 by date instead of year
 
@@ -262,7 +262,8 @@ ggplot(avg_CH4flux_per_day_species, aes(x = Date, y = avg_CH4_flux, color = Spec
   )
 ```
 
-  #remove s7
+#remove s7
+  
 ```{r no S7}
 # Specify the tree ID you want to remove (S7)
 tree_id_to_remove <- "S7"
@@ -303,19 +304,21 @@ ggplot(avg_CH4flux_no_S7, aes(x = Date, y = avg_CH4_flux, color = Species)) +
 
 ```
 
-#Add error bars and remove 2021
+#Add error bars and remove 2021 for CH4 data
 
 ```{r}
-avg_CH4flux_stats_by_date <- tree_dat %>%
-  filter(ID != "S7") %>%
-  mutate(Year = year(Date)) %>%   # only needed for filtering
-  filter(Year != 2021) %>%
-  group_by(Date, Species) %>%     # <-- change here
+avg_CH4flux_stats_filtered <- tree_dat %>%
+  filter(ID != "S7") %>%             # remove tree S7
+  mutate(Year = year(Date)) %>%      # extract year
+  filter(Year != 2021) %>%           # exclude 2021
+  group_by(Year, Species) %>%        # group by Year for annual average
   summarise(
     avg_CH4_flux = mean(CH4_lin_flux.estimate, na.rm = TRUE),
     sd_CH4_flux  = sd(CH4_lin_flux.estimate, na.rm = TRUE),
     .groups = "drop"
   )
+
+# Plot using the filtered dataset
 ggplot(avg_CH4flux_stats_filtered, aes(x = Year, y = avg_CH4_flux, color = Species)) +
   geom_line(size = 1) +
   geom_point(size = 3) +
@@ -335,10 +338,12 @@ ggplot(avg_CH4flux_stats_filtered, aes(x = Year, y = avg_CH4_flux, color = Speci
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
-`````````
+```
+
+
 # Incorporate Plots (SW, FW, Control) into figures
 
-```{}
+```{r}
 
 avg_CH4flux_stats_filtered <- tree_dat %>%
   filter(ID != "S7") %>%
@@ -362,5 +367,144 @@ avg_CH4flux_stats_filtered <- tree_dat %>%
   facet_wrap(~ Plot) +   # <- split panels by plot
   theme_minimal()
 
+```
 
+#Incorporate soildat into CH4 data
 
+```{r}
+
+tree_soil_dat <- tree_dat %>%
+  mutate(
+    Date = as.Date(Date),
+    Plot = recode(Plot, "C" = "Control", "F" = "Freshwater", "S" = "Seawater")
+  ) %>%
+  left_join(
+    soildat %>%
+      mutate(Date = as.Date(Date)) %>%
+      group_by(Plot, Date) %>%
+      summarise(soil.temp.5cm = mean(soil.temp.5cm, na.rm = TRUE), .groups = "drop"),
+    by = c("Plot", "Date"),
+    relationship = "many-to-one"
+  )
+  
+
+  
+  # Ensure Date class matches
+tree_dat$Date <- as.Date(tree_dat$Date)
+soildat$Date <- as.Date(soildat$Date)
+
+# Optional: recode plots to full names
+tree_dat <- tree_dat %>%
+  mutate(Plot = recode(Plot, "C" = "Control", "F" = "Freshwater", "S" = "Seawater"))
+
+soildat <- soildat %>%
+  mutate(Plot = recode(Plot, "C" = "Control", "F" = "Freshwater", "S" = "Seawater"))
+
+# Join soil temperature
+tree_soil_dat <- tree_dat %>%
+  left_join(
+    soildat %>%
+      group_by(Plot, Date) %>%
+      summarise(soil.temp.5cm = mean(soil.temp.5cm, na.rm = TRUE), .groups = "drop"),
+    by = c("Plot", "Date")
+  )
+
+# Check for unmatched rows
+summary(tree_soil_dat$soil.temp.5cm)
+  
+  # Prepare data for plotting
+tree_soil_plot <- tree_soil_dat %>%
+  filter(
+    !is.na(soil.temp.5cm),
+    !is.nan(soil.temp.5cm),
+    !is.na(CH4_lin_flux.estimate),
+    !is.nan(CH4_lin_flux.estimate)
+    )
+    
+  ggplot(tree_soil_plot,
+       aes(x = soil.temp.5cm, y = CH4_lin_flux.estimate, color = Species)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  facet_wrap(~ Plot) +
+  theme_minimal()
+  
+  
+```
+
+#No S7
+
+```{r}
+
+# Prepare the dataset excluding tree S7
+tree_soil_plot_no_S7 <- tree_dat %>%
+  filter(ID != "S7") %>%                              # remove tree S7
+  mutate(
+    Date = as.Date(Date),
+    Plot = recode(Plot, "C" = "Control", "F" = "Freshwater", "S" = "Seawater")
+  ) %>%
+  left_join(
+    soildat %>%
+      mutate(Date = as.Date(Date)) %>%
+      group_by(Plot, Date) %>%
+      summarise(soil.temp.5cm = mean(soil.temp.5cm, na.rm = TRUE), .groups = "drop"),
+    by = c("Plot", "Date"),
+    relationship = "many-to-one"
+  ) %>%
+  filter(
+    !is.na(soil.temp.5cm),
+    !is.nan(soil.temp.5cm),
+    !is.na(CH4_lin_flux.estimate),
+    !is.nan(CH4_lin_flux.estimate)
+  )
+
+# Plot using the new dataset
+
+ggplot(tree_soil_plot_no_S7,
+       aes(x = soil.temp.5cm, y = CH4_lin_flux.estimate, color = Species)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  facet_wrap(~ Plot) +
+  theme_minimal()
+
+```
+
+# Doing the same for CO2
+
+```{r}
+
+# Prepare the dataset including S7 for CO2
+tree_soil_plot_CO2 <- tree_dat %>%
+  mutate(
+    Date = as.Date(Date),
+    Plot = recode(Plot, "C" = "Control", "F" = "Freshwater", "S" = "Seawater")
+  ) %>%
+  left_join(
+    soildat %>%
+      mutate(Date = as.Date(Date)) %>%
+      group_by(Plot, Date) %>%
+      summarise(soil.temp.5cm = mean(soil.temp.5cm, na.rm = TRUE), .groups = "drop"),
+    by = c("Plot", "Date"),
+    relationship = "many-to-one"
+  ) %>%
+  filter(
+    !is.na(soil.temp.5cm),
+    !is.nan(soil.temp.5cm),
+    !is.na(CO2_lin_flux.estimate),
+    !is.nan(CO2_lin_flux.estimate)
+  )
+
+# Plot using the new dataset
+ggplot(tree_soil_plot_CO2,
+       aes(x = soil.temp.5cm, y = CO2_lin_flux.estimate, color = Species)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  facet_wrap(~ Plot) +
+  theme_minimal() +
+  labs(
+    x = "Soil Temperature (5 cm, °C)",
+    y = "CO2 Flux (g CO2 / m² / day)",
+    title = "CO2 Flux vs Soil Temperature by Plot (Including Tree S7)"
+  )
+  
+```
+  
