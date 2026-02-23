@@ -30,6 +30,14 @@ dat <- read_parquet("tempest_tree_ghg_fluxes.parquet")
 
 message(nrow(dat), " rows and ", ncol(dat), " columns")
 ```
+# Change "Seawater" to "Saltwater"
+
+```{}
+
+tree_dat <- tree_dat %>%
+  mutate(Plot = recode(Plot, "Seawater" = "Saltwater"))
+
+```
 
 # Soil data
 
@@ -193,11 +201,11 @@ ggplot(avg_CH4flux_per_year_species, aes(x = Year, y = avg_CH4_flux, color = Spe
     legend.position = "top",  # Position the legend at the top
     axis.text.x = element_text(angle = 45, hjust = 1)  # Angle x-axis labels for better readability
   )
-
+```
 
 # Looking at average CO2 and CH4 by date instead of year
 
-
+```{}
 #calculate average CO2 flux per date per species
 
 # Summarizing by specific Date and Species
@@ -282,7 +290,7 @@ ggplot(avg_CH4flux_no_S7, aes(x = Date, y = avg_CH4_flux, color = Species)) +
   geom_line(size = 1) +  # Add lines to connect points
   geom_point(size = 3) +  # Add points at each data point
   labs(
-    title = "Average CH4 Flux by Date and Species (Excluding Tree S7)", 
+    title = "Average CH4 Flux by Year and Species (Excluding Tree S7)", 
     x = "Date", 
     y = "Average CH4 Flux (g CH4 / m² / day)",
     color = "Species"
@@ -294,4 +302,65 @@ ggplot(avg_CH4flux_no_S7, aes(x = Date, y = avg_CH4_flux, color = Species)) +
   )
 
 ```
+
+#Add error bars and remove 2021
+
+```{r}
+avg_CH4flux_stats_by_date <- tree_dat %>%
+  filter(ID != "S7") %>%
+  mutate(Year = year(Date)) %>%   # only needed for filtering
+  filter(Year != 2021) %>%
+  group_by(Date, Species) %>%     # <-- change here
+  summarise(
+    avg_CH4_flux = mean(CH4_lin_flux.estimate, na.rm = TRUE),
+    sd_CH4_flux  = sd(CH4_lin_flux.estimate, na.rm = TRUE),
+    .groups = "drop"
+  )
+ggplot(avg_CH4flux_stats_filtered, aes(x = Year, y = avg_CH4_flux, color = Species)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(
+    ymin = avg_CH4_flux - sd_CH4_flux,
+    ymax = avg_CH4_flux + sd_CH4_flux
+  ), width = 0.2) +
+  labs(
+    title = "Average Annual CH4 Flux by Species (Excluding Tree S7 and 2021)",
+    x = "Year",
+    y = "Average CH4 Flux (g CH4 / m² / day)",
+    color = "Species"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+`````````
+# Incorporate Plots (SW, FW, Control) into figures
+
+```{}
+
+avg_CH4flux_stats_filtered <- tree_dat %>%
+  filter(ID != "S7") %>%
+  mutate(Year = lubridate::year(Date)) %>%
+  filter(Year != 2021) %>%
+  group_by(Year, Species, Plot) %>%   # <- include Plot here
+  summarise(
+    avg_CH4_flux = mean(CH4_lin_flux.estimate, na.rm = TRUE),
+    sd_CH4_flux = sd(CH4_lin_flux.estimate, na.rm = TRUE),
+    .groups = "drop"
+  )
+  
+  ggplot(avg_CH4flux_stats_filtered,
+       aes(x = Year, y = avg_CH4_flux, color = Species)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(
+    ymin = avg_CH4_flux - sd_CH4_flux,
+    ymax = avg_CH4_flux + sd_CH4_flux
+  ), width = 0.2) +
+  facet_wrap(~ Plot) +   # <- split panels by plot
+  theme_minimal()
+
+
 
