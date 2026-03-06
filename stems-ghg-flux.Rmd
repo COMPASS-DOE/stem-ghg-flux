@@ -106,6 +106,17 @@ tree_dat %>%
   knitr::kable()
 ```
 
+# Seperating seasons
+
+```{r}
+tree_dat %>%
+  mutate(Season=if_else(yday(Date) >100 & yday(Date) <300, 
+                        true = "Growing",
+                        false = "Non-growing")) -> tree_dat
+
+
+
+```
 
 # Plot annual cycle - raw data
 
@@ -126,6 +137,23 @@ ggplot(data = tree_dat,
 
   geom_point() + # Add a layer of points
   labs(title = "Practice")  # Add labels and a title
+
+```
+
+#CH4
+```{r}
+
+tree_ch4_no_S7 <- tree_dat %>%
+  filter(ID != "S7")   # remove tree S7
+
+ggplot(tree_ch4_no_S7, aes(x = Date, y = CH4_lin_flux.estimate, color = Species)) +
+  geom_point() +
+  labs(
+    title = "Practice",
+    x = "Date",
+    y = "CH4 Linear Flux Estimate"
+  ) +
+  theme_minimal()
 ```
 
 # Summarize by ...?
@@ -371,13 +399,13 @@ avg_CH4flux_stats_filtered <- tree_dat %>%
   
   ggplot(avg_CH4flux_stats_filtered,
        aes(x = Year, y = avg_CH4_flux, color = Species)) +
-  geom_line() +
+  geom_smooth(method=lm) +
   geom_point() +
   geom_errorbar(aes(
     ymin = avg_CH4_flux - sd_CH4_flux,
     ymax = avg_CH4_flux + sd_CH4_flux
   ), width = 0.2) +
-  facet_wrap(~ Plot) +   # <- split panels by plot
+  facet_grid(Species~ Plot) +   # <- split panels by plot
   theme_minimal()
 
 ```
@@ -558,3 +586,42 @@ ggplot(tree_soil_vwc_plot,
     color = "Species"
   ) +
   theme_minimal()
+```
+#Flag color between leaf on vs leaf off for soil temp data? May 1st - Sep 1st?
+
+
+
+# s7 methane data
+
+# no s7 
+
+# TITLES: LEAF ON VS LEAF OFF
+# 
+
+
+```{r}
+
+avg_CH4flux_stats_filtered <- tree_dat %>%
+  filter(ID != "S7") %>%
+  mutate(Year = lubridate::year(Date)) %>%
+  filter(Year != 2021) %>%
+  group_by(Year, Species, Plot) %>%   # <- include Plot here
+  summarise(
+    avg_CH4_flux = mean(CH4_lin_flux.estimate, na.rm = TRUE),
+    sd_CH4_flux = sd(CH4_lin_flux.estimate, na.rm = TRUE),
+    .groups = "drop"
+  )
+  
+  ggplot(avg_CH4flux_stats_filtered,
+       aes(x = Year, y = avg_CH4_flux, color = Species)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(
+    ymin = avg_CH4_flux - sd_CH4_flux,
+    ymax = avg_CH4_flux + sd_CH4_flux
+  ), width = 0.2) +
+  facet_wrap(~ Plot) +   # <- split panels by plot
+  theme_minimal()
+
+
+
