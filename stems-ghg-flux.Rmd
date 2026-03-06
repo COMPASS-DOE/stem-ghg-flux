@@ -524,7 +524,6 @@ ggplot(tree_soil_plot_CO2,
 #CH4 vs soil moisture?
 
 ```{r}
-
 tree_soil_vwc <- tree_dat %>%
   mutate(Date = as.Date(Date)) %>%
   left_join(
@@ -537,32 +536,25 @@ tree_soil_vwc <- tree_dat %>%
       ),
     by = c("Plot", "Date")
   )
-  
+
 tree_soil_vwc_plot <- tree_soil_vwc %>%
   filter(ID != "S7") %>%
   filter(
     !is.na(soil.vwc.5cm),
     !is.na(CH4_lin_flux.estimate)
-
   )
 
 ggplot(tree_soil_vwc_plot,
        aes(x = soil.vwc.5cm,
            y = CH4_lin_flux.estimate,
            color = Species)) +
-
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", se = TRUE) +
   facet_wrap(~ Plot) +
-
   labs(
     title = "CH4 Flux vs Soil Moisture",
     x = "Soil Volumetric Water Content (VWC)",
     y = "CH4 Flux (g CH4 / m² / day)",
     color = "Species"
   ) +
-
   theme_minimal()
-
-
-  )
