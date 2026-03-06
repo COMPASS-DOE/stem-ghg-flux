@@ -14,6 +14,7 @@ theme_set(theme_minimal())
 library(arrow)
 library(readr)
 library(tidyr)
+library(lubridate)
 ```
 
 # Science questions
@@ -122,8 +123,6 @@ message("Annual cycle dataset has ", nrow(tree_dat_ac), " rows and ",
 # 2. This plots each tree as a separate color. How useful is this? What are alternatives?
 ggplot(data = tree_dat, 
        mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = Species))+
-       mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = spp))+
-       mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = spp))+
 
   geom_point() + # Add a layer of points
   labs(title = "Practice")  # Add labels and a title
@@ -136,11 +135,9 @@ The trees are _experimental units_ but what we're actually interested in is...
 ```{r annual-cycle-summary}
 
 # EVAN: how do we want to summarize and then plot the annual cycle data?
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 
-library(dplyr)
-library(lubridate)
+
+
 
 #calculate average CO2 flux per year per species
 
@@ -318,7 +315,11 @@ ggplot(avg_CH4flux_no_S7, aes(x = Date, y = avg_CH4_flux, color = Species)) +
 
 #Add error bars and remove 2021 for CH4 data
 
-```{r}
+```
+
+
+```{R}
+
 avg_CH4flux_stats_filtered <- tree_dat %>%
   filter(ID != "S7") %>%             # remove tree S7
   mutate(Year = year(Date)) %>%      # extract year
@@ -519,4 +520,49 @@ ggplot(tree_soil_plot_CO2,
   )
   
 ```
+
+#CH4 vs soil moisture?
+
+```{r}
+
+tree_soil_vwc <- tree_dat %>%
+  mutate(Date = as.Date(Date)) %>%
+  left_join(
+    soildat %>%
+      mutate(Date = as.Date(Date)) %>%
+      group_by(Plot, Date) %>%
+      summarise(
+        soil.vwc.5cm = mean(soil.vwc.5cm, na.rm = TRUE),
+        .groups = "drop"
+      ),
+    by = c("Plot", "Date")
+  )
   
+tree_soil_vwc_plot <- tree_soil_vwc %>%
+  filter(ID != "S7") %>%
+  filter(
+    !is.na(soil.vwc.5cm),
+    !is.na(CH4_lin_flux.estimate)
+
+  )
+
+ggplot(tree_soil_vwc_plot,
+       aes(x = soil.vwc.5cm,
+           y = CH4_lin_flux.estimate,
+           color = Species)) +
+
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  facet_wrap(~ Plot) +
+
+  labs(
+    title = "CH4 Flux vs Soil Moisture",
+    x = "Soil Volumetric Water Content (VWC)",
+    y = "CH4 Flux (g CH4 / m² / day)",
+    color = "Species"
+  ) +
+
+  theme_minimal()
+
+
+  )
