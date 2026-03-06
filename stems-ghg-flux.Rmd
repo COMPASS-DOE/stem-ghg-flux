@@ -122,7 +122,11 @@ message("Annual cycle dataset has ", nrow(tree_dat_ac), " rows and ",
 # 2. This plots each tree as a separate color. How useful is this? What are alternatives?
 ggplot(data = tree_dat, 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
        mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = Species))+
+=======
+       mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = spp))+
+>>>>>>> Stashed changes
 =======
        mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = spp))+
 >>>>>>> Stashed changes
@@ -137,6 +141,7 @@ The trees are _experimental units_ but what we're actually interested in is...
 ```{r annual-cycle-summary}
 
 # EVAN: how do we want to summarize and then plot the annual cycle data?
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 
 library(dplyr)
@@ -311,6 +316,10 @@ ggplot(avg_CH4flux_no_S7, aes(x = Date, y = avg_CH4_flux, color = Species)) +
     axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
   )
 
+=======
+# Compute for each year, plot, sapflux_ID mean annual flux
+# Visualize using geom_boxplot where color is plot and facet is spp
+>>>>>>> Stashed changes
 ```
 
 #Add error bars and remove 2021 for CH4 data
