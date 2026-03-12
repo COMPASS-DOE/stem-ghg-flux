@@ -513,41 +513,87 @@ ggplot(tree_soil_plot_no_S7,
 
 ```{r}
 
-# Prepare the dataset including S7 for CO2
 tree_soil_plot_CO2 <- tree_dat %>%
   mutate(
     Date = as.Date(Date),
-    Plot = recode(Plot, "C" = "Control", "F" = "Freshwater", "S" = "Seawater")
+    Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Seawater")
   ) %>%
   left_join(
     soildat %>%
-      mutate(Date = as.Date(Date)) %>%
+      mutate(
+        Date = as.Date(Date),
+        Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Seawater")
+      ) %>%
       group_by(Plot, Date) %>%
-      summarise(soil.temp.5cm = mean(soil.temp.5cm, na.rm = TRUE), .groups = "drop"),
-    by = c("Plot", "Date"),
-    relationship = "many-to-one"
+      summarise(
+        soil.temp.5cm = mean(soil.temp.5cm, na.rm = TRUE),
+        .groups = "drop"
+      ),
+    by = c("Plot", "Date")
   ) %>%
   filter(
-    !is.na(soil.temp.5cm),
-    !is.nan(soil.temp.5cm),
-    !is.na(CO2_lin_flux.estimate),
-    !is.nan(CO2_lin_flux.estimate)
-  )
-
-# Plot using the new dataset
-ggplot(tree_soil_plot_CO2,
-       aes(x = soil.temp.5cm, y = CO2_lin_flux.estimate, color = Species)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm", se = TRUE) +
-  facet_wrap(~ Plot) +
-  theme_minimal() +
-  labs(
-    x = "Soil Temperature (5 cm, °C)",
-    y = "CO2 Flux (g CO2 / m² / day)",
-    title = "CO2 Flux vs Soil Temperature by Plot (Including Tree S7)"
+    is.finite(soil.temp.5cm),
+    is.finite(CO2_lin_flux.estimate)
   )
   
+ggplot(tree_soil_plot_CO2,
+       aes(x = soil.temp.5cm,
+           y = CO2_lin_flux.estimate,
+           color = Season)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  facet_grid(Species ~ Plot) +
+  theme_minimal() +
+  labs(
+    x = "Soil Temperature (5 cm, C)",
+    y = "CO2 Flux (g CO2 / m2 / day)",
+    title = "CO2 Flux vs Soil Temperature by Plot"
+  )
 ```
+# same for ch4
+
+```{r}
+
+tree_soil_plot_CO2 <- tree_dat %>%
+  mutate(
+    Date = as.Date(Date),
+    Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Seawater")
+  ) %>%
+  left_join(
+    soildat %>%
+      mutate(
+        Date = as.Date(Date),
+        Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Seawater")
+      ) %>%
+      group_by(Plot, Date) %>%
+      summarise(
+        soil.temp.5cm = mean(soil.temp.5cm, na.rm = TRUE),
+        .groups = "drop"
+      ),
+    by = c("Plot", "Date")
+  ) %>%
+  filter(
+    is.finite(soil.temp.5cm),
+    is.finite(CH4_lin_flux.estimate)
+  )
+  
+ggplot(tree_soil_plot_CO2,
+       aes(x = soil.temp.5cm,
+           y = CH4_lin_flux.estimate,
+           color = Season)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  facet_grid(Species ~ Plot) +
+  theme_minimal() +
+  labs(
+    x = "Soil Temperature (5 cm, C)",
+    y = "CH4 Flux (g CO2 / m2 / day)",
+    title = "CH4 Flux vs Soil Temperature by Plot"
+  )
+
+```
+
+
 
 #CH4 vs soil moisture?
 
