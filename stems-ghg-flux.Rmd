@@ -133,23 +133,46 @@ message("Annual cycle dataset has ", nrow(tree_dat_ac), " rows and ",
 # 1. What data frame do we want to use to plot?
 # 2. This plots each tree as a separate color. How useful is this? What are alternatives?
 ggplot(data = tree_dat_ac, 
-       mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = Species))+
+       mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = Species)) +
+  geom_point(alpha = 0.7, size = 2) +   # slightly larger, semi-transparent points
+  labs(
+    title = "CO2 Flux from Tree Stems Over Time by Species",
+    x = "Date",
+    y = expression("CO2 Flux (g CO2 / m² / day)"),  # uses proper units
+    color = "Tree Species"
+  ) +
+  theme_minimal() 
+  
 
-  geom_point() + # Add a layer of points
-<<<<<<< Updated upstream
-  labs(title = "Practice")  # Add labels and a title
+```
 
-<<<<<<< HEAD
-=======
+```{r visualizing}
 tree_dat_ac %>%
   group_by(Plot)%>%
   summarize(n()) %>%
   knitr::kable()
 
 
->>>>>>> 655604abc5ab079b4ae9fc8d58ee425d5379ec41
 ```
 
+```{r expanding this CO2 idea}
+ggplot(data = tree_dat_ac, 
+       mapping = aes(x = Date, y = CO2_lin_flux.estimate, color = Species)) +
+  geom_point() +
+  facet_grid(Species ~ Plot) +        # add this line
+  labs(
+    title = "CO2 Flux by Date and Plot",
+    x = "Date",
+    y = "CO2 Flux (g CO2 / m² / day)",
+    
+  ) +
+  theme_minimal()
+
+
+
+
+
+```
 #CH4
 ```{r}
 
@@ -164,10 +187,48 @@ ggplot(tree_ch4_no_S7, aes(x = Date, y = CH4_lin_flux.estimate, color = Species)
     y = "CH4 Linear Flux Estimate"
   ) +
   theme_minimal()
-=======
+
   labs(title = "CO2 flux by species by date")  # Add labels and a title
->>>>>>> Stashed changes
 ```
+
+
+```{r better version of CH4 all plots}
+
+ggplot(data = tree_dat, 
+       mapping = aes(x = Date, y = CH4_lin_flux.estimate, color = Species)) +
+  geom_point(alpha = 0.7, size = 2) +   # semi-transparent, slightly larger points
+  labs(
+    title = "CH₄ Flux from Tree Stems Over Time by Species",
+    x = "Date",
+    y = expression("CH₄ Flux (g CH₄ / m² / day)"),  # proper units
+    color = "Tree Species"
+  ) +
+  theme_minimal() 
+
+
+
+```
+
+```{r this but without s7}
+
+ggplot(data = tree_dat %>% filter(ID != "S7"), 
+       mapping = aes(x = Date, y = CH4_lin_flux.estimate, color = Species)) +
+  geom_point(alpha = 0.7, size = 2) +   # semi-transparent, slightly larger points
+  labs(
+    title = "CH₄ Flux from Tree Stems Over Time by Species (Excluding Tree S7)",
+    x = "Date",
+    y = expression("CH₄ Flux (g CH₄ / m² / day)"),  # proper units
+    color = "Tree Species"
+  ) +
+  theme_minimal()
+
+
+
+```
+
+
+
+
 ```{r}
 ggplot(data = tree_dat, 
        mapping = aes(x = Date, y = CH4_lin_flux.estimate, color = Species))+
@@ -418,21 +479,21 @@ avg_CH4flux_stats_filtered <- tree_dat %>%
   
   ggplot(avg_CH4flux_stats_filtered,
        aes(x = Year, y = avg_CH4_flux, color = Species)) +
-<<<<<<< HEAD
+
   geom_smooth(method=lm) +
-=======
+
   geom_smooth(method=lm)+
->>>>>>> 655604abc5ab079b4ae9fc8d58ee425d5379ec41
+
   geom_point() +
   geom_errorbar(aes(
     ymin = avg_CH4_flux - sd_CH4_flux,
     ymax = avg_CH4_flux + sd_CH4_flux
   ), width = 0.2) +
-<<<<<<< HEAD
+
   facet_grid(Species~ Plot) +   # <- split panels by plot
-=======
+
   facet_grid(Species ~ Plot) +   # <- split panels by plot
->>>>>>> 655604abc5ab079b4ae9fc8d58ee425d5379ec41
+
   theme_minimal()
 
 ```
@@ -554,13 +615,14 @@ ggplot(tree_soil_plot_no_S7,
 tree_soil_plot_CO2 <- tree_dat %>%
   mutate(
     Date = as.Date(Date),
-    Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Seawater")
+    Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Salt")
   ) %>%
   left_join(
     soildat %>%
       mutate(
         Date = as.Date(Date),
-        Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Seawater")
+        Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Saltwater
+                    ")
       ) %>%
       group_by(Plot, Date) %>%
       summarise(
@@ -573,7 +635,10 @@ tree_soil_plot_CO2 <- tree_dat %>%
     is.finite(soil.temp.5cm),
     is.finite(CO2_lin_flux.estimate)
   )
-  
+tree_soil_plot_CO2 <- tree_soil_plot_CO2 %>%
+  mutate(Plot = recode(Plot, "Seawater" = "Saltwater"))  
+
+
 ggplot(tree_soil_plot_CO2,
        aes(x = soil.temp.5cm,
            y = CO2_lin_flux.estimate,
@@ -592,7 +657,7 @@ ggplot(tree_soil_plot_CO2,
 
 ```{r}
 
-tree_soil_plot_CO2 <- tree_dat %>%
+tree_soil_plot_CH4 <- tree_dat %>%
   mutate(
     Date = as.Date(Date),
     Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Seawater")
@@ -601,7 +666,7 @@ tree_soil_plot_CO2 <- tree_dat %>%
     soildat %>%
       mutate(
         Date = as.Date(Date),
-        Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Seawater")
+        Plot = recode(Plot, "C"="Control","F"="Freshwater","S"="Saltwater")
       ) %>%
       group_by(Plot, Date) %>%
       summarise(
@@ -615,7 +680,10 @@ tree_soil_plot_CO2 <- tree_dat %>%
     is.finite(CH4_lin_flux.estimate)
   )
   
-ggplot(tree_soil_plot_CO2,
+tree_soil_plot_CH4 <- tree_soil_plot_CH4 %>%
+  mutate(Plot = recode(Plot, "Seawater" = "Saltwater"))  
+
+ggplot(tree_soil_plot_CH4,
        aes(x = soil.temp.5cm,
            y = CH4_lin_flux.estimate,
            color = Season)) +
@@ -707,5 +775,5 @@ avg_CH4flux_stats_filtered <- tree_dat %>%
   facet_wrap(~ Plot) +   # <- split panels by plot
   theme_minimal()
 
-wqe
+```
 
