@@ -690,5 +690,5 @@ avg_CH4flux_stats_filtered <- tree_dat %>%
   facet_wrap(~ Plot) +   # <- split panels by plot
   theme_minimal()
 
-
+wqe
 
