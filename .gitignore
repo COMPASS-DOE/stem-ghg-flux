@@ -50,6 +50,7 @@ rsconnect/
 
 # Rmarkdown outputs
 *.html
+*.png
 
 # OS files
 .DS_Store
